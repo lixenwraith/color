@@ -55,7 +55,8 @@ func (c RGB) Lerp(other RGB, t float64) RGB {
 
 // Luma returns Rec. 601 luminance: R*0.299 + G*0.587 + B*0.114
 func Luma(c RGB) uint8 {
-	return uint8((int(c.R)*299 + int(c.G)*587 + int(c.B)*114) / 1000)
+	// +500 rounds half-up, uniform rounding across the package
+	return uint8((int(c.R)*299 + int(c.G)*587 + int(c.B)*114 + 500) / 1000)
 }
 
 // RedmeanDistance returns squared perceptually-weighted distance between a and b.

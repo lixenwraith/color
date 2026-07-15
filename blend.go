@@ -1,17 +1,22 @@
 package color
 
-import "math"
+import (
+	"math"
+	"sync"
+)
 
 const softLightLUTSize = 256
 
 // Perez SoftLight lookup tables (array access, no pointers)
 // Pre-computed at init to avoid sqrt/division in per-cell loops
 var (
-	softLightG  [softLightLUTSize]float64
-	softLightDF [softLightLUTSize]float64
+	softLightG    [softLightLUTSize]float64
+	softLightDF   [softLightLUTSize]float64
+	softLightOnce sync.Once
 )
 
-func init() {
+// buildSoftLightLUT populates the Perez soft light tables. Called once, lazily.
+func buildSoftLightLUT() {
 	for i := range softLightLUTSize {
 		df := float64(i) / 255.0
 		softLightDF[i] = df
@@ -98,6 +103,7 @@ func Blend(dst, src RGB, alpha float64) RGB {
 // SoftLight applies Perez soft light blend, gentler than linear alpha
 // intensity in [0,1] mixes between dst and the blended result
 func SoftLight(dst, src RGB, intensity float64) RGB {
+	softLightOnce.Do(buildSoftLightLUT)
 	return RGB{
 		R: softLightChannel(dst.R, src.R, intensity),
 		G: softLightChannel(dst.G, src.G, intensity),
@@ -184,4 +190,22 @@ func Grayscale(c RGB) RGB {
 	// CHANGED: shared with Luma
 	g := Luma(c)
 	return RGB{R: g, G: g, B: g}
+}
+
+// Desaturate is partial desaturation; t=0 identity, t=1 full grayscale
+func Desaturate(c RGB, t float64) RGB { return c.Lerp(Grayscale(c), t) }
+
+// Lerp is free form of RGB.Lerp, uniform with the rest of the blend family
+func Lerp(a, b RGB, t float64) RGB { return a.Lerp(b, t) }
+
+// LerpFixed interpolates a→b using fixed-point factor t with the given
+// fractional bit count. t is nominally in [0, 1<<shift]. No float, no alloc.
+// Truncates toward −∞ (parity with the prior integer implementation);
+// this is intentionally distinct from the half-up float Lerp.
+func LerpFixed(a, b RGB, t int64, shift uint) RGB {
+	return RGB{
+		R: uint8(int64(a.R) + (((int64(b.R) - int64(a.R)) * t) >> shift)),
+		G: uint8(int64(a.G) + (((int64(b.G) - int64(a.G)) * t) >> shift)),
+		B: uint8(int64(a.B) + (((int64(b.B) - int64(a.B)) * t) >> shift)),
+	}
 }
