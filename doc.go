@@ -6,8 +6,9 @@
 // image/color.Color, so values pass directly into image, draw, and GUI
 // toolkit pipelines without conversion.
 //
-// Device concerns — terminal capability detection, xterm-256 quantization,
-// SGR emission, framebuffer formats — belong in the consuming package.
+// Palette quantization (RGBTo256, RGBTo16) lives here; device concerns —
+// terminal capability detection, SGR emission, framebuffer formats — belong
+// in the consuming package.
 //
 // # Operations
 //

@@ -130,6 +130,47 @@ func computeRedmean256(c RGB) uint8 {
 
 var cubeValues = [6]uint8{0, 95, 135, 175, 215, 255}
 
+// ANSI 16 color indices, sent as SGR 30-37/90-97 (40-47/100-107 background).
+// The terminal's theme picks the shade; a text console renders them too.
+const (
+	ANSIBlack uint8 = iota
+	ANSIRed
+	ANSIGreen
+	ANSIYellow
+	ANSIBlue
+	ANSIMagenta
+	ANSICyan
+	ANSIWhite
+	ANSIBrightBlack
+	ANSIBrightRed
+	ANSIBrightGreen
+	ANSIBrightYellow
+	ANSIBrightBlue
+	ANSIBrightMagenta
+	ANSIBrightCyan
+	ANSIBrightWhite
+)
+
+// xterm's default shades for the ANSI 16 indices, the reference for RGBTo16
+var ansi16 = [16]RGB{
+	{0, 0, 0}, {205, 0, 0}, {0, 205, 0}, {205, 205, 0},
+	{0, 0, 238}, {205, 0, 205}, {0, 205, 205}, {229, 229, 229},
+	{127, 127, 127}, {255, 0, 0}, {0, 255, 0}, {255, 255, 0},
+	{92, 92, 255}, {255, 0, 255}, {0, 255, 255}, {255, 255, 255},
+}
+
+// RGBTo16 converts 24-bit RGB to the nearest ANSI 16 index (Redmean distance
+// to xterm's default shades), for terminals limited to 16 colors.
+func RGBTo16(c RGB) uint8 {
+	best, minDist := ANSIBlack, 1<<30
+	for i, cand := range ansi16 {
+		if d := RedmeanDistance(c, cand); d < minDist {
+			best, minDist = uint8(i), d
+		}
+	}
+	return best
+}
+
 // RGBTo256 converts 24-bit RGB to the nearest xterm-256 palette index.
 // O(1) via the Redmean LUT; the first call builds it.
 func RGBTo256(c RGB) uint8 {
