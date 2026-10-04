@@ -77,15 +77,22 @@ var Accent = color.MustParseHex("#ff8800")
 accent = { r = 255, g = 136, b = 0 }
 ```
 
-## With terminal
+## Terminal palettes
 
-`terminal.Cell` carries `color.RGB` directly. Quantization stays device-side:
+Quantization for terminals that cannot take 24-bit color:
 
 ```go
-idx := terminal.RGBTo256(color.EmeraldGreen)   // xterm-256 index
+idx := color.RGBTo256(color.EmeraldGreen)   // xterm-256 index, Redmean LUT
+ansi := color.RGBTo16(color.EmeraldGreen)   // ANSI 16 index, for text consoles
 ```
 
-Note: when `Cell.Attrs` sets `AttrFg256` / `AttrBg256`, `Cell.Fg.R` / `Cell.Bg.R` hold a palette index, not a channel. Such values are not colors and must not be passed to this package.
+`ANSIBlack` .. `ANSIBrightWhite` name the 16 indices (SGR `30-37`/`90-97`).
+The terminal's theme picks their shade, so they suit semantic colors such as
+log levels. `RGBTo16` measures against xterm's default shades.
+
+`terminal.Cell` carries `color.RGB` directly. When `Cell.Attrs` sets
+`AttrFg256` / `AttrBg256`, `Cell.Fg.R` / `Cell.Bg.R` hold a palette index, not
+a channel. Such values are not colors and must not be passed to this package.
 
 ## Concurrency
 

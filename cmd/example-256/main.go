@@ -54,7 +54,7 @@ func showGrayscaleRamp() {
 		idx := color.Gray256(step)
 		fmt.Print(block256(idx, 2))
 	}
-	fmt.Println("\n")
+	fmt.Print("\n\n")
 }
 
 // =====================================================================
