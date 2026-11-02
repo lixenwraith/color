@@ -96,7 +96,7 @@ a channel. Such values are not colors and must not be passed to this package.
 
 ## Concurrency
 
-Values are immutable, operations are pure, lookup tables are built at package init. Safe for concurrent use.
+Values are immutable and operations are pure. The 256-color LUT is built once, on first use or by `WarmXterm256`. Safe for concurrent use.
 
 ## License
 
