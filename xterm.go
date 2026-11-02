@@ -91,17 +91,10 @@ func lut256Build() *[lut256Size]uint8 {
 // Optional, prevents latency spike on first RGBTo256 render in the terminal loop.
 func WarmXterm256() { _ = lut256() }
 
+// computeRedmean256 is the cube or ramp entry nearest c. A gray needs no case of
+// its own: Redmean weighs a step between grays alike at every level, so a gray
+// finds the nearest of the 30 grays, the cube's six among them
 func computeRedmean256(c RGB) uint8 {
-	if c.R == c.G && c.G == c.B {
-		if c.R < 8 {
-			return 16
-		}
-		if c.R > 238 {
-			return 231
-		}
-		return uint8(232 + (int(c.R)-8)/10)
-	}
-
 	bestIdx := uint8(16)
 	minDist := 1 << 30
 
