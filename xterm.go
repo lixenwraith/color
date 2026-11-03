@@ -170,6 +170,47 @@ func RGBTo256(c RGB) uint8 {
 	return lut256()[int(c.R>>2)<<12|int(c.G>>2)<<6|int(c.B>>2)]
 }
 
+// Xterm256 returns the color xterm shows by default for a palette index: the
+// ANSI 16 shades RGBTo16 measures against, the 6x6x6 cube, then the gray ramp.
+func Xterm256(index uint8) RGB {
+	switch {
+	case index < 16:
+		return ansi16[index]
+	case index >= 232:
+		v := 8 + 10*(index-232)
+		return RGB{v, v, v}
+	}
+	n := index - 16
+	return RGB{cubeValues[n/36], cubeValues[n/6%6], cubeValues[n%6]}
+}
+
+// Xterm256To16 converts an xterm-256 palette index to the nearest ANSI 16
+// index, for a text console: the first 16 are themselves, the rest go as
+// RGBTo16 takes their Xterm256 color. O(1).
+func Xterm256To16(index uint8) uint8 {
+	return xterm256To16[index]
+}
+
+// xterm256To16 is RGBTo16 of each palette index's color, written out
+var xterm256To16 = [256]uint8{
+	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+	0, 0, 4, 4, 4, 4, 0, 8, 8, 12, 12, 12, 2, 8, 6, 6,
+	6, 12, 2, 2, 6, 6, 6, 6, 2, 2, 6, 6, 6, 14, 10, 10,
+	6, 6, 14, 14, 0, 0, 5, 4, 4, 4, 8, 8, 8, 8, 12, 12,
+	2, 8, 8, 8, 12, 12, 2, 8, 8, 8, 6, 12, 2, 8, 8, 6,
+	6, 14, 10, 10, 6, 6, 14, 14, 1, 1, 5, 5, 5, 5, 8, 8,
+	8, 8, 12, 12, 3, 8, 8, 8, 12, 12, 3, 8, 8, 8, 8, 12,
+	3, 8, 8, 7, 7, 7, 3, 3, 7, 7, 7, 7, 1, 1, 5, 5,
+	5, 5, 1, 8, 8, 8, 12, 12, 3, 8, 8, 8, 8, 12, 3, 8,
+	8, 8, 7, 7, 3, 3, 7, 7, 7, 7, 3, 3, 7, 7, 7, 7,
+	1, 1, 5, 5, 5, 13, 1, 8, 8, 8, 5, 12, 3, 8, 8, 8,
+	7, 7, 3, 3, 8, 7, 7, 7, 3, 3, 7, 7, 7, 7, 11, 11,
+	7, 7, 7, 15, 9, 9, 5, 5, 13, 13, 9, 8, 8, 5, 13, 13,
+	3, 3, 8, 7, 7, 7, 3, 3, 7, 7, 7, 7, 11, 11, 7, 7,
+	7, 7, 11, 11, 7, 7, 15, 15, 0, 0, 0, 0, 0, 0, 8, 8,
+	8, 8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7,
+}
+
 // Cube256 returns the xterm 256-palette index for an RGB cube coordinate.
 func Cube256(r, g, b uint8) uint8 {
 	if r > 5 {

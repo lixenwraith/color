@@ -10,7 +10,7 @@ Extracted from [lixenwraith/terminal](https://github.com/lixenwraith/terminal) s
 go get github.com/lixenwraith/color
 ```
 
-Go 1.26+. Standard library only.
+Go 1.27+. Standard library only.
 
 ## Type
 
@@ -84,15 +84,19 @@ Quantization for terminals that cannot take 24-bit color:
 ```go
 idx := color.RGBTo256(color.EmeraldGreen)   // xterm-256 index, Redmean LUT
 ansi := color.RGBTo16(color.EmeraldGreen)   // ANSI 16 index, for text consoles
+rgb := color.Xterm256(idx)                  // the index's default xterm color
+ansi = color.Xterm256To16(idx)              // a 256 index for a text console, O(1)
 ```
 
 `ANSIBlack` .. `ANSIBrightWhite` name the 16 indices (SGR `30-37`/`90-97`).
 The terminal's theme picks their shade, so they suit semantic colors such as
-log levels. `RGBTo16` measures against xterm's default shades.
+log levels. `RGBTo16` measures against xterm's default shades, which `Xterm256`
+returns for those indices.
 
 `terminal.Cell` carries `color.RGB` directly. When `Cell.Attrs` sets
 `AttrFg256` / `AttrBg256`, `Cell.Fg.R` / `Cell.Bg.R` hold a palette index, not
-a channel. Such values are not colors and must not be passed to this package.
+a channel. Such a value is an index, not a color: `Xterm256` and `Xterm256To16`
+take it, and no other operation does.
 
 ## Concurrency
 
