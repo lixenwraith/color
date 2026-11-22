@@ -159,7 +159,7 @@ func showImageBridge() {
 	fmt.Printf("  color.Orange.RGBA()        = (%d,%d,%d,%d)\n\n", r, g, b, alpha)
 }
 
-// showPulse animates a Blend between two colors on one line until ctx is cancelled.
+// showPulse animates a Blend between two colors on one line until ctx is canceled.
 func showPulse(ctx context.Context) {
 	const width = 32
 	fmt.Println("── Live pulse (Ctrl+C to exit) ──")
